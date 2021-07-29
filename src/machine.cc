@@ -238,56 +238,58 @@ void Z80Spectrum::keyb(int press, SDL_KeyboardEvent* eventkey) {
     int key = eventkey->keysym.sym;
     int ts;
 
+    inreg = 0;
+
     switch (key) {
 
         // Первый ряд
-        case SDLK_1: key_press(3, 0x01, press); break;
-        case SDLK_2: key_press(3, 0x02, press); break;
-        case SDLK_3: key_press(3, 0x04, press); break;
-        case SDLK_4: key_press(3, 0x08, press); break;
-        case SDLK_5: key_press(3, 0x10, press); break;
-        case SDLK_6: key_press(4, 0x10, press); break;
-        case SDLK_7: key_press(4, 0x08, press); break;
-        case SDLK_8: key_press(4, 0x04, press); break;
-        case SDLK_9: key_press(4, 0x02, press); break;
-        case SDLK_0: key_press(4, 0x01, press); break;
+        case SDLK_1: key_press(3, 0x01, press); inreg = kshift ? '!' : '1'; break;
+        case SDLK_2: key_press(3, 0x02, press); inreg = kshift ? '@' : '2'; break;
+        case SDLK_3: key_press(3, 0x04, press); inreg = kshift ? '#' : '3'; break;
+        case SDLK_4: key_press(3, 0x08, press); inreg = kshift ? '$' : '4'; break;
+        case SDLK_5: key_press(3, 0x10, press); inreg = kshift ? '%' : '5'; break;
+        case SDLK_6: key_press(4, 0x10, press); inreg = kshift ? '^' : '6'; break;
+        case SDLK_7: key_press(4, 0x08, press); inreg = kshift ? '&' : '7'; break;
+        case SDLK_8: key_press(4, 0x04, press); inreg = kshift ? '*' : '8'; break;
+        case SDLK_9: key_press(4, 0x02, press); inreg = kshift ? '(' : '9'; break;
+        case SDLK_0: key_press(4, 0x01, press); inreg = kshift ? ')' : '0'; break;
 
         // Второй ряд
-        case SDLK_q: key_press(2, 0x01, press); break;
-        case SDLK_w: key_press(2, 0x02, press); break;
-        case SDLK_e: key_press(2, 0x04, press); break;
-        case SDLK_r: key_press(2, 0x08, press); break;
-        case SDLK_t: key_press(2, 0x10, press); break;
-        case SDLK_y: key_press(5, 0x10, press); break;
-        case SDLK_u: key_press(5, 0x08, press); break;
-        case SDLK_i: key_press(5, 0x04, press); break;
-        case SDLK_o: key_press(5, 0x02, press); break;
-        case SDLK_p: key_press(5, 0x01, press); break;
+        case SDLK_q: key_press(2, 0x01, press); inreg = kshift ? 'Q' : 'q'; break;
+        case SDLK_w: key_press(2, 0x02, press); inreg = kshift ? 'W' : 'w'; break;
+        case SDLK_e: key_press(2, 0x04, press); inreg = kshift ? 'E' : 'e'; break;
+        case SDLK_r: key_press(2, 0x08, press); inreg = kshift ? 'R' : 'r'; break;
+        case SDLK_t: key_press(2, 0x10, press); inreg = kshift ? 'T' : 't'; break;
+        case SDLK_y: key_press(5, 0x10, press); inreg = kshift ? 'Y' : 'y'; break;
+        case SDLK_u: key_press(5, 0x08, press); inreg = kshift ? 'U' : 'u'; break;
+        case SDLK_i: key_press(5, 0x04, press); inreg = kshift ? 'I' : 'i'; break;
+        case SDLK_o: key_press(5, 0x02, press); inreg = kshift ? 'O' : 'o'; break;
+        case SDLK_p: key_press(5, 0x01, press); inreg = kshift ? 'P' : 'p'; break;
 
         // Третий ряд
-        case SDLK_a: key_press(1, 0x01, press); break;
-        case SDLK_s: key_press(1, 0x02, press); break;
-        case SDLK_d: key_press(1, 0x04, press); break;
-        case SDLK_f: key_press(1, 0x08, press); break;
-        case SDLK_g: key_press(1, 0x10, press); break;
-        case SDLK_h: key_press(6, 0x10, press); break;
-        case SDLK_j: key_press(6, 0x08, press); break;
-        case SDLK_k: key_press(6, 0x04, press); break;
-        case SDLK_l: key_press(6, 0x02, press); break;
-        case SDLK_RETURN:    key_press(6, 0x01, press); break;
-        case SDLK_KP_ENTER:  key_press(6, 0x01, press); break;
+        case SDLK_a: key_press(1, 0x01, press); inreg = kshift ? 'A' : 'a'; break;
+        case SDLK_s: key_press(1, 0x02, press); inreg = kshift ? 'S' : 's'; break;
+        case SDLK_d: key_press(1, 0x04, press); inreg = kshift ? 'D' : 'd'; break;
+        case SDLK_f: key_press(1, 0x08, press); inreg = kshift ? 'F' : 'f'; break;
+        case SDLK_g: key_press(1, 0x10, press); inreg = kshift ? 'G' : 'g'; break;
+        case SDLK_h: key_press(6, 0x10, press); inreg = kshift ? 'H' : 'h'; break;
+        case SDLK_j: key_press(6, 0x08, press); inreg = kshift ? 'J' : 'j'; break;
+        case SDLK_k: key_press(6, 0x04, press); inreg = kshift ? 'K' : 'k'; break;
+        case SDLK_l: key_press(6, 0x02, press); inreg = kshift ? 'L' : 'l'; break;
+        case SDLK_RETURN:    key_press(6, 0x01, press); inreg = 10; break;
+        case SDLK_KP_ENTER:  key_press(6, 0x01, press); inreg = 10; break;
 
         // Четвертый ряд
-        case SDLK_LSHIFT:   key_press(0, 0x01, press); break;
-        case SDLK_z:        key_press(0, 0x02, press); break;
-        case SDLK_x:        key_press(0, 0x04, press); break;
-        case SDLK_c:        key_press(0, 0x08, press); break;
-        case SDLK_v:        key_press(0, 0x10, press); break;
-        case SDLK_b:        key_press(7, 0x10, press); break;
-        case SDLK_n:        key_press(7, 0x08, press); break;
-        case SDLK_m:        key_press(7, 0x04, press); break;
-        case SDLK_RSHIFT:   key_press(7, 0x02, press); break;
-        case SDLK_SPACE:    key_press(7, 0x01, press); break;
+        case SDLK_LSHIFT:   key_press(0, 0x01, press); kshift = press; break;
+        case SDLK_z:        key_press(0, 0x02, press); inreg = kshift ? 'Z' : 'z'; break;
+        case SDLK_x:        key_press(0, 0x04, press); inreg = kshift ? 'X' : 'x'; break;
+        case SDLK_c:        key_press(0, 0x08, press); inreg = kshift ? 'C' : 'c'; break;
+        case SDLK_v:        key_press(0, 0x10, press); inreg = kshift ? 'V' : 'v'; break;
+        case SDLK_b:        key_press(7, 0x10, press); inreg = kshift ? 'B' : 'b'; break;
+        case SDLK_n:        key_press(7, 0x08, press); inreg = kshift ? 'N' : 'n'; break;
+        case SDLK_m:        key_press(7, 0x04, press); inreg = kshift ? 'M' : 'm'; break;
+        case SDLK_RSHIFT:   key_press(7, 0x02, press); kshift = press; break;
+        case SDLK_SPACE:    key_press(7, 0x01, press); inreg = ' '; break;
 
         // Специальные
         case SDLK_LEFT:         key_press(0, 0x01, press); key_press(3, 0x10, press); break; // SS+5
@@ -297,16 +299,18 @@ void Z80Spectrum::keyb(int press, SDL_KeyboardEvent* eventkey) {
         case SDLK_TAB:          key_press(0, 0x01, press); key_press(7, 0x02, press); break; //  SS+CS
         case SDLK_BACKQUOTE:    key_press(0, 0x01, press); key_press(3, 0x01, press); break; // SS+1 EDIT
         case SDLK_CAPSLOCK:     key_press(0, 0x01, press); key_press(3, 0x02, press); break; // SS+2 CAP (DANGER)
-        case SDLK_BACKSPACE:    key_press(0, 0x01, press); key_press(4, 0x01, press); break; // SS+0 BS
-        case SDLK_ESCAPE:       key_press(0, 0x01, press); key_press(7, 0x01, press); break; // SS+SPC
-        case SDLK_COMMA:        key_press(7, 0x02, press); key_press(7, 0x08, press); break; // ,
-        case SDLK_PERIOD:       key_press(7, 0x02, press); key_press(7, 0x04, press); break; // .
-        case SDLK_MINUS:        key_press(7, 0x02, press); key_press(6, 0x08, press); break; // -
-        case SDLK_EQUALS:       key_press(7, 0x02, press); key_press(6, 0x02, press); break; // =
-        case SDLK_KP_PLUS:      key_press(7, 0x02, press); key_press(6, 0x04, press); break; // +
-        case SDLK_KP_MINUS:     key_press(7, 0x02, press); key_press(6, 0x08, press); break; // -
-        case SDLK_KP_MULTIPLY:  key_press(7, 0x02, press); key_press(7, 0x10, press); break; // *
-        case SDLK_KP_DIVIDE:    key_press(7, 0x02, press); key_press(0, 0x10, press); break; // /
+        case SDLK_BACKSPACE:    key_press(0, 0x01, press); key_press(4, 0x01, press); inreg = 8; break; // SS+0 BS
+        case SDLK_ESCAPE:       key_press(0, 0x01, press); key_press(7, 0x01, press); inreg = 27; break; // SS+SPC
+        case SDLK_COMMA:        key_press(7, 0x02, press); key_press(7, 0x08, press); inreg = ','; break; // ,
+        case SDLK_PERIOD:       key_press(7, 0x02, press); key_press(7, 0x04, press); inreg = '.'; break; // .
+        case SDLK_MINUS:        key_press(7, 0x02, press); key_press(6, 0x08, press); inreg = '-'; break; // -
+        case SDLK_EQUALS:       key_press(7, 0x02, press); key_press(6, 0x02, press); inreg = '='; break; // =
+
+        // KeyPad
+        case SDLK_KP_PLUS:      key_press(7, 0x02, press); key_press(6, 0x04, press); inreg = '+'; break; // +
+        case SDLK_KP_MINUS:     key_press(7, 0x02, press); key_press(6, 0x08, press); inreg = '-'; break; // -
+        case SDLK_KP_MULTIPLY:  key_press(7, 0x02, press); key_press(7, 0x10, press); inreg = '*'; break; // *
+        case SDLK_KP_DIVIDE:    key_press(7, 0x02, press); key_press(0, 0x10, press); inreg = '/'; break; // /
 
         // Отладка
         default:
@@ -350,5 +354,7 @@ void Z80Spectrum::keyb(int press, SDL_KeyboardEvent* eventkey) {
                 case SDLK_F10: loadbin("zexall", 0x8000); break;
             }
     }
+
+    if (inreg && press) klatch ^= 1;
 }
 #endif

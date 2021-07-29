@@ -141,6 +141,7 @@ protected:
 // -----------------------------------------------------------------
 
     int     key_states[8];
+    int     inreg, klatch, kshift;
     int     con_frame_start, con_frame_end, con_frame_fps, skip_first_frames;
     int     auto_keyb, skip_dup_frame;
     int     contended_mem;

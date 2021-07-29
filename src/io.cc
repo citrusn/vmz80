@@ -54,6 +54,9 @@ unsigned char Z80Spectrum::io_read(unsigned int port) {
     // Чтение клавиатуры
     if      (port == 0xFFFD) { return ay_register; }
     else if (port == 0xBFFD) { return ay_regs[ay_register%15]; }
+    // Порты Лисиона
+    else if (port == 0x00EF) { return inreg; }
+    else if (port == 0x01EF) { return klatch; }
     //else if (port == 0x7FFD) {
     else if ((port&255) == 0xFD) {
         return port_7ffd;
@@ -81,9 +84,8 @@ unsigned char Z80Spectrum::io_read(unsigned int port) {
 // Запись в порт
 void Z80Spectrum::io_write(unsigned int port, unsigned char data) {
 
-    // AY address register
+    // AY address register/data
     if (port == 0xFFFD) { ay_register = data & 15; }
-    // AY address data
     else if (port == 0xBFFD) { ay_write_data(data); }
     else if (port == 0x1FFD) { /* ничего пока что */ }
     //else if (port == 0x7FFD) {
