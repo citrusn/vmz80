@@ -55,6 +55,9 @@ void Z80Spectrum::loadbin(const char* filename, int address) {
 }
 
 // Загрузка базового ROM
+// 0: 128k
+// 1: 48k
+// 4: TrDOS
 void Z80Spectrum::loadrom(const char* filename, int bank) {
 
     char fn[128];

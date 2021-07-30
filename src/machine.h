@@ -197,6 +197,19 @@ protected:
     int     ds_color_fore, ds_color_back;
 
 // -----------------------------------------------------------------
+// Свойства: SPI
+// -----------------------------------------------------------------
+
+    int     spi_data;
+    int     spi_st;
+    int     spi_resp;
+    int     spi_command, spi_arg, spi_phase, spi_crc;
+    int     spi_status;
+    int     spi_lba;
+    FILE    *spi_file;
+    unsigned char spi_sector[512];
+
+// -----------------------------------------------------------------
 // Методы: Эмуляция и память
 // -----------------------------------------------------------------
 
@@ -267,6 +280,14 @@ protected:
     void    pixel(int x, int y, uint color);
     void    cls(int cl);
     void    z80state_dump();
+
+// -----------------------------------------------------------------
+// Addon.SPI
+// -----------------------------------------------------------------
+
+    void            spi_write_data(unsigned char data);
+    unsigned char   spi_read_data();
+    void            spi_write_cmd(unsigned char data);
 
 // -----------------------------------------------------------------
 // Методы: SDL-ориентированные

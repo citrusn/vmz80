@@ -51,6 +51,7 @@ Z80Spectrum::Z80Spectrum() {
     record_file         = NULL;
     wave_file           = NULL;
 
+    // Инициализация Debugger View
     ds_ad               = 0;
     ds_size             = 0;
     bp_count            = 0;
@@ -64,6 +65,18 @@ Z80Spectrum::Z80Spectrum() {
     bp_step_pc          = 0;
     ds_showfb           = 0;
     ds_halt_dump        = 0;
+
+    // SPI инициализация
+    spi_data            = 0;
+    spi_st              = 0;
+    spi_resp            = 0;
+    spi_command         = 0;
+    spi_phase           = 0;
+    spi_arg             = 0;
+    spi_crc             = 0;
+    spi_status          = 0;
+    spi_lba             = 0;
+    spi_file            = NULL;
 
 #ifndef NO_SDL
     AudioSDLFrame       = 0; // SDL-фрейм позади основного
