@@ -1,3 +1,5 @@
+#define SDL_MAIN_HANDLED
+#include <SDL2/SDL.h>
 #include "z80.cc"
 #include "machine.h"
 #include "machine.cc"
@@ -11,8 +13,7 @@
 // Расширения
 #include "addon.spi.cc"
 
-int main(int argc, char* argv[]) {
-
+int main(int argc, char** argv) {        
     Z80Spectrum speccy;
 
     speccy.args(argc, argv);

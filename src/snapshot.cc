@@ -61,11 +61,11 @@ void Z80Spectrum::loadbin(const char* filename, int address) {
 void Z80Spectrum::loadrom(const char* filename, int bank) {
 
     char fn[128];
-
+    printf ("fn=%s bank=%d \r\n", filename, bank);
     FILE* fp = fopen(filename, "rb");
     if (fp == NULL) {
 
-        sprintf(fn, "/usr/local/share/vmzx/%s", filename);
+        sprintf(fn, "%s", filename);
         fp = fopen(fn, "rb");
         if (fp == NULL) {
             printf("ROM %s not exists\n", filename);

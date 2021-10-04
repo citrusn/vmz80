@@ -105,7 +105,7 @@ void Z80Spectrum::frame() {
     frame_counter++;
 }
 
-uint Z80Spectrum::get_color(int color) {
+Uint32 Z80Spectrum::get_color(int color) {
 
     switch (color) {
         case 0:  return 0x000000;
@@ -124,6 +124,23 @@ uint Z80Spectrum::get_color(int color) {
         case 13: return 0x00FFFF;
         case 14: return 0xFFFF00;
         case 15: return 0xFFFFFF;
+
+      /*  case 0:  return SDL_Color{0, 0, 0, 255};
+        case 1:  return SDL_Color{0x00, 0x00, 0xc0};
+        case 2:  return SDL_Color{0xc0, 0x00, 0x00};
+        case 3:  return SDL_Color{0xc0, 0x00, 0xc0};
+        case 4:  return SDL_Color{0x00, 0xc0, 0x00};
+        case 5:  return SDL_Color{0x00, 0xc0, 0xc0};
+        case 6:  return SDL_Color{0xc0, 0xc0, 0x00};
+        case 7:  return SDL_Color{0xc0, 0xc0, 0xc0};
+        case 8:  return SDL_Color{0x00, 0x00, 0x00};
+        case 9:  return SDL_Color{0x00, 0x00, 0xFF};
+        case 10: return SDL_Color{0xFF, 0x00, 0x00};
+        case 11: return SDL_Color{0xFF, 0x00, 0xFF};
+        case 12: return SDL_Color{0x00, 0xFF, 0x00};
+        case 13: return SDL_Color{0x00, 0xFF, 0xFF};
+        case 14: return SDL_Color{0xFF, 0xFF, 0x00};
+        case 15: return SDL_Color{0xFF, 0xFF, 0xFF};*/
     }
 
     return 0;
@@ -154,7 +171,7 @@ void Z80Spectrum::update_charline(int address) {
         int  pix = (byte & (0x80 >> j)) ? 1 : 0;
 
         // Если есть атрибут мерация, то учитывать это
-        uint clr = bright | ((flash ? (pix ^ flash_state) : pix) ? frcolor : bgcolor);
+        Uint32 clr = bright | ((flash ? (pix ^ flash_state) : pix) ? frcolor : bgcolor);
 
         // Вывести пиксель
         pset(48 + 8*x + j, 48 + y, clr);
@@ -163,23 +180,26 @@ void Z80Spectrum::update_charline(int address) {
 
 void Z80Spectrum::cls(int cl) {
 #ifndef NO_SDL
-    if (sdl_enable && sdl_screen) {
+    if (sdl_enable && sdl_renderer) {
+        Uint32 color =  get_color(cl);
+        printf("Clear =%d\r\n",cl);        
         for (int _i = 0; _i < 9*320*240; _i++)
-            ( (Uint32*)sdl_screen->pixels )[_i] = get_color(cl);
+            pixels[_i] = color;
     }
 #endif
 }
 
-void Z80Spectrum::pixel(int x, int y, uint color) {
+void Z80Spectrum::pixel(int x, int y, Uint32 color) {
 #ifndef NO_SDL
-    if (sdl_enable && sdl_screen) {
-        ( (Uint32*)sdl_screen->pixels )[x + 3*320*y] = color;
+    if (sdl_enable && sdl_renderer) {
+       //printf("pixel x=%d y=%d c=%d\r\n", x, y, color);
+       pixels[x + 3*320*y] = color;             
     }
 #endif
 }
 
 // Установка точки
-void Z80Spectrum::pset(int x, int y, uint color) {
+void Z80Spectrum::pset(int x, int y, Uint32 color) {
 
     color &= 15;
 
@@ -189,9 +209,14 @@ void Z80Spectrum::pset(int x, int y, uint color) {
 
 #ifndef NO_SDL
         if (sdl_enable && sdl_screen) {
-            for (int k = 0; k < 9; k++)
-                ( (Uint32*)sdl_screen->pixels )[ 3*(x + 3*320*y) + (k%3) + 3*320*(k/3) ] = get_color(color);
-        }
+            Uint32 clr = get_color(color);
+            //SDL_SetRenderDrawColor(sdl_renderer, clr.r, clr.g, clr.b, 255);
+            //printf("pset x=%d y=%d c=%d\r\n", x, y, color);
+            for (int k = 0; k < 9; k++) 
+            //    for (int j = 0; j < 3; j++) 
+                    pixels[ 3*(x + 3*320*y) + (k%3) + 3*320*(k/3) ] = clr;
+                    //SDL_RenderDrawPoint(sdl_renderer, x*3+k, y*3+j);                
+        }        
 #endif
 
         // Запись фреймбуфера
@@ -204,7 +229,7 @@ void Z80Spectrum::pset(int x, int y, uint color) {
 
         // Тест повторного кадра: если есть какое-то отличие, то ставить diff
         if (skip_dup_frame && pb[ptr] != fb[ptr]) diff_prev_frame = 1;
-    }
+    } //else printf("error x or y in pset function\r\n");
 }
 
 // -----------------------------------------------------------------

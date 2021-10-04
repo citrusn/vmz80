@@ -1,3 +1,4 @@
+#include <iostream>
 /**
  * Основной цикл работы VM
  */
@@ -5,14 +6,25 @@ void Z80Spectrum::main() {
 
 #ifndef NO_SDL
     // Инициализация SDL
-    if (sdl_enable) {
+    if (sdl_enable) {        
+        SDL_Init(SDL_INIT_EVERYTHING);
+        //SDL_EnableUNICODE(1);
 
-        SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO);
-        SDL_EnableUNICODE(1);
-
-        sdl_screen = SDL_SetVideoMode(3*320, 3*240, 32, SDL_HWSURFACE | SDL_DOUBLEBUF);
-        SDL_WM_SetCaption("ZX Spectrum Virtual Machine", 0);
-        SDL_EnableKeyRepeat(500, 30);
+        //sdl_screen = SDL_SetVideoMode(3*320, 3*240, 32, SDL_HWSURFACE | SDL_DOUBLEBUF);        
+        //SDL_WM_SetCaption("ZX Spectrum Virtual Machine", 0);
+        sdl_screen = SDL_CreateWindow("ZX Spectrum Virtual Machine",
+                        100,
+                        100,
+                        3*320, 3*240,
+                        SDL_WINDOW_SHOWN
+                    );
+        sdl_renderer = SDL_CreateRenderer(sdl_screen, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC | SDL_RENDERER_TARGETTEXTURE);
+        sdl_texture = SDL_CreateTexture(sdl_renderer,
+                               SDL_PIXELFORMAT_ARGB8888,
+                               SDL_TEXTUREACCESS_STREAMING,
+                               3*320, 3*240);
+        pixels = (Uint32*) malloc(4*3*320*3*240);
+        //SDL_EnableKeyRepeat(500, 30);
 
         // Количество семплов 882 x 50 = 44100
         if (sdl_disable_sound == 0) {
@@ -36,11 +48,11 @@ void Z80Spectrum::main() {
 
         // Если при старте включен отладчик - перерисовать его окно
         if (ds_viewmode == 0) { ds_cursor = ds_start = pc; disasm_repaint(); }
-
+        int time_curr = SDL_GetTicks();
         while (1) {
 
             // Регистрация событий
-            while (SDL_PollEvent(& event)) {
+            while (SDL_PollEvent(&event)) {
 
                 switch (event.type) {
 
@@ -50,27 +62,31 @@ void Z80Spectrum::main() {
                         // for (int i = 0; i < 256; i++) printf("%08x %x \n", statistics[i], i);
                         return;
 
-                    case SDL_KEYDOWN: keyb(1, & event.key); break;
-                    case SDL_KEYUP:   keyb(0, & event.key); break;
+                    case SDL_KEYDOWN: keyb(1, &event.key); break;
+                    case SDL_KEYUP:   keyb(0, &event.key); break;
                 }
             }
 
             // Вычисление разности времени
-            ftime(&ms_clock);
-            int time_curr = ms_clock.millitm;
-            int time_diff = time_curr - ms_clock_old;
-            if (time_diff < 0) time_diff += 1000;
+            //ftime(&ms_clock);
+            //int time_curr = ms_clock.millitm;
+            //int time_diff = time_curr - ms_clock_old;
+            //if (time_diff < 0) time_diff += 1000;
 
             // Если прошло 20 мс
-            if (time_diff >= 20) {
-
+            if (SDL_GetTicks() - time_curr >= 20) {
+                int time_curr = SDL_GetTicks();
                 if (ds_viewmode) frame();
-                ms_clock_old = time_curr;
-                SDL_Flip(sdl_screen);
+                //ms_clock_old = time_curr;                
+                //SDL_Flip(sdl_screen);
+                //SDL_RenderClear(sdl_renderer);
+                SDL_UpdateTexture(sdl_texture, NULL, pixels, 3*320 * sizeof(Uint32));
+                SDL_RenderCopy(sdl_renderer, sdl_texture, NULL, NULL);
+                SDL_RenderPresent(sdl_renderer);                
             }
 
-            SDL_PumpEvents();
-            SDL_Delay(1);
+            // SDL_PumpEvents();
+            // SDL_Delay(1);
         }
     }
     // Выполнение спектрума из консоли
@@ -84,11 +100,10 @@ void Z80Spectrum::main() {
 
 // Разбор аргументов
 void Z80Spectrum::args(int argc, char** argv) {
-
-    int bin_offset;
-
+    
+    int bin_offset;    
     for (int u = 1; u < argc; u++) {
-
+        printf("argc=%d, arg=%s \r\n", u, argv[u]);
         // Параметр
         if (argv[u][0] == '-') {
 
@@ -334,7 +349,7 @@ void Z80Spectrum::keyb(int press, SDL_KeyboardEvent* eventkey) {
 
                 // Пошаговое исполнение
                 case SDLK_F7:
-
+                    printf("step...\r\n");
                     if (ds_viewmode) {
 
                         ds_viewmode = 0;
@@ -359,7 +374,10 @@ void Z80Spectrum::keyb(int press, SDL_KeyboardEvent* eventkey) {
                     if (ds_viewmode == 0) ds_viewmode = 1;
                     break;
 
-                case SDLK_F10: loadbin("zexall", 0x8000); break;
+                case SDLK_F10: 
+                    loadbin("zexall", 0x8000); 
+                    printf("zexall is loaded\r\n");
+                    break;
             }
     }
 

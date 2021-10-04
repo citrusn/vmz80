@@ -324,7 +324,7 @@ void Z80Spectrum::redraw_fb() {
 
             unsigned int ptr = (239-y)*160 + (x>>1);
             int cl = (x & 1 ? fb[ptr] : fb[ptr]>>4) & 15;
-            for (int _a = 0; _a < 9; _a++) pixel(3*x+(_a%3), 3*y+(_a/3), get_color(cl));
+            for (int _a = 0; _a < 9; _a++) pixel(3*x+(_a%3), 3*y+(_a/3), cl);
         }
     }
 

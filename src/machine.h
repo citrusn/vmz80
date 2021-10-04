@@ -14,7 +14,6 @@
 
 #ifndef NO_SDL
 
-#include "SDL.h"
 #define MAX_AUDIOSDL_BUFFER 882*16
 
 // Циклический буфер
@@ -100,7 +99,11 @@ protected:
 
 #ifndef NO_SDL
     SDL_Event       event;
-    SDL_Surface*    sdl_screen;
+    //SDL_Surface*    sdl_screen;
+    SDL_Window*     sdl_screen;
+    SDL_Renderer*   sdl_renderer;
+    SDL_Texture*    sdl_texture; 
+    Uint32*         pixels; 
     SDL_AudioSpec   audio_device;
 #endif
 
@@ -133,7 +136,7 @@ protected:
 
     int     beam_drawing, beam_in_paper;
     int     flash_state, flash_counter;
-    uint    border_id, port_fe;
+    Uint32    border_id, port_fe;
     int     diff_prev_frame;
 
 // -----------------------------------------------------------------
@@ -244,9 +247,9 @@ protected:
 // Методы: Работа с видеобуфером
 // -----------------------------------------------------------------
 
-    unsigned int get_color(int color);
+    Uint32 get_color(int color);
     void    update_charline(int address);
-    void    pset(int x, int y, uint color);
+    void    pset(int x, int y, Uint32 color);
 
 // -----------------------------------------------------------------
 // Методы: Сохранение и загрузка
@@ -277,7 +280,7 @@ protected:
     void    disasm_repaint();
     void    print(int x, int y, const char* s);
     void    print_char(int x, int y, unsigned char ch);
-    void    pixel(int x, int y, uint color);
+    void    pixel(int x, int y, Uint32 color);
     void    cls(int cl);
     void    z80state_dump();
 
