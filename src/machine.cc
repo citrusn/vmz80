@@ -32,16 +32,16 @@ void Z80Spectrum::main() {
             audio_device.freq     = 44100;
             audio_device.format   = AUDIO_U8;
             audio_device.channels = 2;
-            audio_device.samples  = 882;
+            audio_device.samples  = 882/2; // два канала, #TODO: надо переделать 
             audio_device.callback = sdl_audio_buffer;
             audio_device.userdata = NULL;
 
-            if (SDL_OpenAudio(& audio_device, NULL) < 0) {
+            if (SDL_OpenAudio(&audio_device, NULL) < 0) {
                 fprintf(stderr, "Couldn't open audio: %s\n", SDL_GetError());
                 exit(1);
             }
 
-            for (int w = 0; w < 16*882; w++) ZXAudioBuffer[w] = 0x80;
+            for (int w = 0; w < MAX_AUDIOSDL_BUFFER; w++) ZXAudioBuffer[w] = 0x00; //sds тишина?
 
             SDL_PauseAudio(0);
         }
@@ -60,6 +60,8 @@ void Z80Spectrum::main() {
 
                         // Выдать статистику использования опкодов
                         // for (int i = 0; i < 256; i++) printf("%08x %x \n", statistics[i], i);
+                        free(pixels);
+                        SDL_CloseAudio();
                         return;
 
                     case SDL_KEYDOWN: keyb(1, &event.key); break;
@@ -68,19 +70,20 @@ void Z80Spectrum::main() {
             }
 
             // Вычисление разности времени
-            //ftime(&ms_clock);
-            //int time_curr = ms_clock.millitm;
-            //int time_diff = time_curr - ms_clock_old;
-            //if (time_diff < 0) time_diff += 1000;
+            /*ftime(&ms_clock);
+            int time_curr = ms_clock.millitm;
+            int time_diff = time_curr - ms_clock_old;
+            if (time_diff < 0) time_diff += 1000;*/
 
             // Если прошло 20 мс
-            if (SDL_GetTicks() - time_curr >= 20) {
-                int time_curr = SDL_GetTicks();
+            if (SDL_GetTicks() - time_curr > 19) { // 50Гц
+            //if (time_diff >= 20) {
+                time_curr = SDL_GetTicks();
                 if (ds_viewmode) frame();
                 //ms_clock_old = time_curr;                
                 //SDL_Flip(sdl_screen);
                 //SDL_RenderClear(sdl_renderer);
-                SDL_UpdateTexture(sdl_texture, NULL, pixels, 3*320 * sizeof(Uint32));
+                SDL_UpdateTexture(sdl_texture, NULL, pixels, 3*320 * sizeof(Uint32)); // ширина строки
                 SDL_RenderCopy(sdl_renderer, sdl_texture, NULL, NULL);
                 SDL_RenderPresent(sdl_renderer);                
             }

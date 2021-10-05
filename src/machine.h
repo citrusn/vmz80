@@ -22,13 +22,19 @@ int           AudioZXFrame;
 unsigned char ZXAudioBuffer[MAX_AUDIOSDL_BUFFER];
 
 // Аудиобуфер
-void sdl_audio_buffer(void* udata, unsigned char* stream, int len) {
+void sdl_audio_buffer(void* unused, unsigned char* stream, int len) {
 
     // Выдача данных
     for (int w = 0; w < 882; w++) {
 
         int v = ZXAudioBuffer[882*AudioSDLFrame + w];
         stream[w] = v;
+    }
+    if (len>882) {
+        printf("Audio stream len=%d ", len);
+        for (int w = 882; w < len; w++) {
+            stream[w] = 0;
+        }
     }
 
     // К следующему (если можно)
