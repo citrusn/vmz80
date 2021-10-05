@@ -182,7 +182,7 @@ void Z80Spectrum::cls(int cl) {
 #ifndef NO_SDL
     if (sdl_enable && sdl_renderer) {
         Uint32 color =  get_color(cl);
-        printf("Clear =%d\r\n",cl);        
+        printf("Clear = %d\r\n",cl);        
         for (int _i = 0; _i < 9*320*240; _i++)
             pixels[_i] = color;
     }
@@ -209,13 +209,10 @@ void Z80Spectrum::pset(int x, int y, Uint32 color) {
 
 #ifndef NO_SDL
         if (sdl_enable && sdl_screen) {
-            Uint32 clr = get_color(color);
-            //SDL_SetRenderDrawColor(sdl_renderer, clr.r, clr.g, clr.b, 255);
+            Uint32 clr = get_color(color);            
             //printf("pset x=%d y=%d c=%d\r\n", x, y, color);
-            for (int k = 0; k < 9; k++) 
-            //    for (int j = 0; j < 3; j++) 
+            for (int k = 0; k < 9; k++)              
                     pixels[ 3*(x + 3*320*y) + (k%3) + 3*320*(k/3) ] = clr;
-                    //SDL_RenderDrawPoint(sdl_renderer, x*3+k, y*3+j);                
         }        
 #endif
 
