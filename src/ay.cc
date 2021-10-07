@@ -218,14 +218,14 @@ void Z80Spectrum::ay_amp_adder(int& left, int& right) {
 // Вызывается каждую 1/44100 секунду
 void Z80Spectrum::ay_sound_tick(int t_states, int& audio_c) {
 
-    // Гарантированное 44100 за max_audio_cycle (1 секунда)
+    // Гарантированное 44100
     t_states_wav += 44100 * t_states;
 
     // К следующему звуковому тику
     if (t_states_wav > max_audio_cycle) {
 
         // Для аккуратного перекидывания остатков
-        t_states_wav %= max_audio_cycle;
+        t_states_wav -= max_audio_cycle;
 
         // Порт бипера берется за основу тона
         int beep  = !!(port_fe & 0x10) ^ !!(port_fe & 0x08);

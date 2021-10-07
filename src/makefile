@@ -4,8 +4,8 @@ SCALE=-vf "scale=w=1280:h=960,pad=width=1920:height=1080:x=320:y=60:color=black"
 
 all:
 # `sdl-config --cflags --libs
-	g++ -g main.cc -o vmzx -lmingw32 -lSDL2main -lSDL2
-	vmzx
+	g++ main.cc -o vmzx -lmingw32 -lSDL2main -lSDL2
+	./vmzx
 test:
 	./vmzx RAGE.z80
 nosdl:

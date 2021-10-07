@@ -70,22 +70,23 @@ void Z80Spectrum::main() {
             }
 
             // Вычисление разности времени
-            /*ftime(&ms_clock);
-            int time_curr = ms_clock.millitm;
-            int time_diff = time_curr - ms_clock_old;
-            if (time_diff < 0) time_diff += 1000;*/
+            //ftime(&ms_clock);
+            //int time_curr = ms_clock.millitm;
+            //int time_diff = time_curr - ms_clock_old;
+            int time_diff = SDL_GetTicks() - time_curr;
+            //if (time_diff < 0) time_diff += 1000;
 
             // Если прошло 20 мс
-            if (SDL_GetTicks() - time_curr > 19) { // 50Гц
-            //if (time_diff >= 20) {
-                time_curr = SDL_GetTicks();
+            if ( time_diff > 19) { // 50Гц
+                time_curr += time_diff; 
                 if (ds_viewmode) frame();
                 //ms_clock_old = time_curr;                
                 //SDL_Flip(sdl_screen);
-                //SDL_RenderClear(sdl_renderer);
                 SDL_UpdateTexture(sdl_texture, NULL, pixels, 3*320 * sizeof(Uint32)); // ширина строки
                 SDL_RenderCopy(sdl_renderer, sdl_texture, NULL, NULL);
-                SDL_RenderPresent(sdl_renderer);                
+                SDL_RenderPresent(sdl_renderer);    
+                //time_diff = SDL_GetTicks() - time_curr-19;
+                //if (time_diff>0) printf("%d-", time_diff);
             }
 
             // SDL_PumpEvents();
