@@ -217,7 +217,7 @@ void Z80Spectrum::ay_amp_adder(int& left, int& right) {
 
 int p_beep; // прошлое значение 
 int vol; //громкость бипера
-int ofs =8;
+int ofs =32;
 // Вызывается каждую 1/44100 секунду
 void Z80Spectrum::ay_sound_tick(int t_states, int& audio_c) {
 
@@ -236,7 +236,7 @@ void Z80Spectrum::ay_sound_tick(int t_states, int& audio_c) {
         
         if (beep != p_beep) { 
             p_beep = beep;
-            if (beep) vol = 8 - (ofs=-1*ofs); 
+            if (beep) vol = ofs=-1*ofs; 
             else vol = 0;         
         }
         int left  = 0x80 + vol; 
