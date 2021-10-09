@@ -4,14 +4,14 @@ SCALE=-vf "scale=w=1280:h=960,pad=width=1920:height=1080:x=320:y=60:color=black"
 
 all:
 # `sdl-config --cflags --libs
-	g++ -g main.cc -o vmzx -lmingw32 -lSDL2main -lSDL2
+	g++ -g main.cc -o vmzx -IInc -LLib -lmingw32 -lSDL2main -lSDL2
 	vmzx
 test:
 	./vmzx RAGE.z80
 nosdl:
 	g++ -DNO_SDL main.cc -o vmzx
 tap:
-	./vmzx 48k.z80 program.tap
+	./vmzx  AYtest_v0.2.tap 
 dizzy3:
 	./vmzx snapshots/dizzy3_128.z80
 dizzy3bmp:

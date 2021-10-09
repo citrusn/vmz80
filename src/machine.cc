@@ -32,7 +32,7 @@ void Z80Spectrum::main() {
             audio_device.freq     = 44100;
             audio_device.format   = AUDIO_U8;
             audio_device.channels = 2;
-            audio_device.samples  = 882/2; // два канала, #TODO: надо переделать 
+            audio_device.samples  = 882; // два канала, #DONE: надо переделать 
             audio_device.callback = sdl_audio_buffer;
             audio_device.userdata = NULL;
 
@@ -41,7 +41,7 @@ void Z80Spectrum::main() {
                 exit(1);
             }
 
-            for (int w = 0; w < MAX_AUDIOSDL_BUFFER; w++) ZXAudioBuffer[w] = 0x00; //sds тишина?
+            for (int w = 0; w < MAX_AUDIOSDL_BUFFER; w++) ZXAudioBuffer[w] = 0x80; //тишина!
 
             SDL_PauseAudio(0);
         }
@@ -200,6 +200,7 @@ void Z80Spectrum::args(int argc, char** argv) {
         }
         // Загрузка файла BAS с ленты
         else if (strstr(argv[u], ".tap") != NULL) {
+            printf("loadtap");
             loadtap(argv[u]);
         }
         // Загрузка файла SNA
