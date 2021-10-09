@@ -405,8 +405,8 @@ void Z80Spectrum::loadsna(const char* filename) {
     ix = data[17] + data[18]*256;
     sp = data[23] + data[24]*256;
 
-    iff1 = !!(data[19] & 1);
-    iff2 = !!(data[19] & 2);
+    iff1 = !!(data[19] & 4);
+    iff2 = !!(data[19] & 4);
 
     set_flags_register(data[21]);
     a = data[22];

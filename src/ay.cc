@@ -215,6 +215,8 @@ void Z80Spectrum::ay_amp_adder(int& left, int& right) {
     if (right > 255) right = 255; else if (right < 0) right = 0;
 }
 
+int p_beep; // прошлое значение 
+int vol; //громкость бипера
 // Вызывается каждую 1/44100 секунду
 void Z80Spectrum::ay_sound_tick(int t_states, int& audio_c) {
 
@@ -225,13 +227,22 @@ void Z80Spectrum::ay_sound_tick(int t_states, int& audio_c) {
     if (t_states_wav > max_audio_cycle) {
 
         // Для аккуратного перекидывания остатков
-        t_states_wav %= max_audio_cycle;
+        t_states_wav -= max_audio_cycle;
 
         // Порт бипера берется за основу тона
-        int beep  = !!(port_fe & 0x10) ^ !!(port_fe & 0x08);
-        //if (beep) printf("beep..");
-        int left  = 0x00 + (beep ? 32 : 0); //sds
-        int right = 0x00 + (beep ? 32 : 0); //sds
+        //int beep  = !!(port_fe & 0x10) ^ !!(port_fe & 0x08);
+        //int beep  = port_fe & 0x10;
+        int beep = (port_fe & 0x10);
+        
+        if (beep != p_beep) { 
+            p_beep = beep;
+            if (beep) vol = 16; 
+            else vol = 0;         
+        }
+        int left  = 0x80 + vol; //(beep ? 0 : 32); //sds
+        int right = 0x80 + vol;//(beep ? 0: 32); //sds
+        //int left  = 0x80 + (beep ? 0 : 32);
+        //int right = 0x80 + (beep ? 0: 32); 
 
         // Использовать AY
         ay_amp_adder(left, right);
@@ -242,7 +253,7 @@ void Z80Spectrum::ay_sound_tick(int t_states, int& audio_c) {
 
 #ifndef NO_SDL
         // Запись аудиострима в буфер (с циклом)
-        AudioZXFrame = ab_cursor / 882;
+        AudioZXFrame = ab_cursor / (2*882);
         ZXAudioBuffer[ab_cursor++] = left;
         ZXAudioBuffer[ab_cursor++] = right;
         ab_cursor %= MAX_AUDIOSDL_BUFFER;
