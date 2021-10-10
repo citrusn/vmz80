@@ -35,13 +35,17 @@ void Z80Spectrum::main() {
             audio_device.samples  = 882/2; // два канала, #TODO: надо переделать 
             audio_device.callback = sdl_audio_buffer;
             audio_device.userdata = NULL;
+            SDL_AudioSpec fact;
+	    SDL_OpenAudioDevice(NULL, 0, &audio_device, obtained, SDL_AUDIO_ALLOW_ANY_CHANGE);
 
-            if (SDL_OpenAudio(&audio_device, NULL) < 0) {
-                fprintf(stderr, "Couldn't open audio: %s\n", SDL_GetError());
+            if (SDL_OpenAudio(&audio_device, NULL) < 0 ) {
+                fprintf(stderr, "Couldn't open audio: %s\n", SDL_GetError());                
                 exit(1);
             }
+            printf("Silence value:%d Buffer size:%d Format:%d\n",
+                     audio_device.silence, audio_device.size, audio_device.format);
 
-            for (int w = 0; w < MAX_AUDIOSDL_BUFFER; w++) ZXAudioBuffer[w] = 0x00; //sds тишина?
+            for (int w = 0; w < MAX_AUDIOSDL_BUFFER; w++) ZXAudioBuffer[w] = 0x80; //sds тишина?
 
             SDL_PauseAudio(0);
         }

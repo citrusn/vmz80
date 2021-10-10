@@ -33,7 +33,7 @@ void sdl_audio_buffer(void* unused, unsigned char* stream, int len) {
     if (len>882) {
         printf("Audio stream len=%d ", len);
         for (int w = 882; w < len; w++) {
-            stream[w] = 0;
+            stream[w] = 0x80;
         }
     }
 
