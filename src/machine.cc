@@ -200,7 +200,7 @@ void Z80Spectrum::args(int argc, char** argv) {
         }
         // Загрузка файла BAS с ленты
         else if (strstr(argv[u], ".tap") != NULL) {
-            printf("loadtap");
+            printf("loadtap: %s\n", argv[u]);
             loadtap(argv[u]);
         }
         // Загрузка файла SNA
