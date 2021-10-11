@@ -3,7 +3,7 @@
  * Общая область: 352x296
  */
 
-#include <sys/timeb.h>
+//#include <sys/timeb.h>
 #include <unistd.h>
 #include <fcntl.h>
 #include <stdlib.h>
@@ -25,25 +25,19 @@ unsigned char ZXAudioBuffer[MAX_AUDIOSDL_BUFFER];
 void sdl_audio_buffer(void* unused, unsigned char* stream, int len) {
 
     // Выдача данных
-    for (int w = 0; w < 882; w++) {
+    for (int w = 0; w < 882*2; w++) {
 
-        int v = ZXAudioBuffer[882*AudioSDLFrame + w];
+        int v = ZXAudioBuffer[2*882*AudioSDLFrame + w];
         stream[w] = v;
-    }
-    if (len>882) {
-        printf("Audio stream len=%d ", len);
-        for (int w = 882; w < len; w++) {
-            stream[w] = 0x80;
-        }
-    }
+    }    
 
     // К следующему (если можно)
     if (AudioSDLFrame != AudioZXFrame) {
-        AudioSDLFrame = (AudioSDLFrame + 1) % 16;
+        AudioSDLFrame = (AudioSDLFrame + 1) % 8;
     }
     // Если догнал - то отстать на несколько кадров
     else {
-        AudioSDLFrame = ((AudioZXFrame + 16) - 8) % 16;
+        AudioSDLFrame = ((AudioZXFrame + 8) - 4) % 8;
     }
 }
 #endif
@@ -137,8 +131,8 @@ protected:
 
     // Таймер обновления экрана
     unsigned int    ms_time_diff;
-    struct timeb    ms_clock;
-    unsigned int    ms_clock_old;
+    //struct timeb    ms_clock;
+    //unsigned int    ms_clock_old;
 
     int     beam_drawing, beam_in_paper;
     int     flash_state, flash_counter;

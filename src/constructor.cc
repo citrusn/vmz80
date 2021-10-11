@@ -17,7 +17,7 @@ Z80Spectrum::Z80Spectrum() {
     t_states_all        = 0;
     flash_state         = 0;
     flash_counter       = 0;
-    ms_clock_old        = 0;
+    //ms_clock_old        = 0;
     autostart           = 0;
     frame_counter       = 0;
     skip_dup_frame      = 0;
