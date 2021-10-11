@@ -221,7 +221,7 @@ int ofs = 8;
 // Вызывается каждую 1/44100 секунду
 void Z80Spectrum::ay_sound_tick(int t_states, int& audio_c) {
 
-    // Гарантированное 44100 за max_audio_cycle (1 секунда)
+    // Гарантированное 44100
     t_states_wav += 44100 * t_states;
 
     // К следующему звуковому тику

@@ -15,17 +15,20 @@ void Z80Spectrum::frame() {
     int cols_paper    = 200;   // 200      | 68
     int irq_row       = 304;   // 296      | 304
     int ppu_x = 0, ppu_y = 0, ay_state = 0;
-
-    max_audio_cycle = max_tstates*50;
+    
+    max_audio_cycle = max_tstates*50; // всего циклов за секунду
 
     // Автоматическое нажимание на клавиши
-    autostart_macro();
+    //autostart_macro();
 
     // Всегда сбрасывать в начале кадра (чтобы демки работали)
     t_states_cycle = 0;
+    // отдельно считаем такты ЦПУ, дабы отвязать его него привязки остального оборудования
+    int t_states_cpu = 0; 
 
     // Выполнить необходимое количество циклов
     while (t_states_cycle < max_tstates) {
+    //for (t_states_cycle=0; t_states_cycle < max_tstates; t_states_cycle+=10)   {
 
         contended_mem = 0;
 
@@ -45,17 +48,22 @@ void Z80Spectrum::frame() {
 
         // Вход в TRDOS
         trdos_handler();
-
+        int i ;
         // Исполнение инструкции
-        int t_states = run_instruction();
+        if (t_states_cpu < max_tstates) {
+            i = run_instruction();
+            t_states_cpu += i;
+            t_states_all += i;
+        }
 
+        int t_states = 8; //
         t_states_cycle += t_states;
-        t_states_all   += t_states;
+        
 
-        // 1 CPU = 2 PPU
+        // 1 CPU (3.5МГц) = 2 PPU (7 МГц) 
         for (int w = 0; w < t_states; w++) {
 
-            // Каждые 32 тика срабатывает AY-чип
+            // Каждые 32 тика срабатывает AY-чип 3.5МГц / 32
             if (((ay_state++) & 0x1f) == 0) ay_tick();
 
             // Видимая рисуемая область
@@ -87,8 +95,9 @@ void Z80Spectrum::frame() {
         // Запись в wav звука (учитывая автостарт)
         ay_sound_tick(t_states, audio_c);
     }
+    //printf("%d %d\n", t_states_cycle, t_states_cpu );
 
-    t_states_cycle %= max_tstates;
+    t_states_cycle -= max_tstates;
 
     // Мерцающие элементы
     flash_counter++;
@@ -191,10 +200,10 @@ void Z80Spectrum::cls(int cl) {
 
 void Z80Spectrum::pixel(int x, int y, Uint32 color) {
 #ifndef NO_SDL
-    if (sdl_enable && sdl_renderer) {
+    //if (sdl_enable && sdl_renderer) {
        //printf("pixel x=%d y=%d c=%d\r\n", x, y, color);
        pixels[x + 3*320*y] = color;             
-    }
+    //}
 #endif
 }
 
@@ -211,8 +220,8 @@ void Z80Spectrum::pset(int x, int y, Uint32 color) {
         if (sdl_enable && sdl_screen) {
             Uint32 clr = get_color(color);            
             //printf("pset x=%d y=%d c=%d\r\n", x, y, color);
-            for (int k = 0; k < 9; k++)              
-                    pixels[ 3*(x + 3*320*y) + (k%3) + 3*320*(k/3) ] = clr;
+            for (int k = 0; k < 9; k++)            
+                pixels[ 3*(x + 3*320*y) + (k%3) + 3*320*(k/3) ] = clr;
         }        
 #endif
 
