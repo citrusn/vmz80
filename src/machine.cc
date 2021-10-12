@@ -204,7 +204,6 @@ void Z80Spectrum::args(int argc, char** argv) {
         }
         // Загрузка файла BAS с ленты
         else if (strstr(argv[u], ".tap") != NULL) {
-            printf("loadtap: %s\n", argv[u]);
             loadtap(argv[u]);
         }
         // Загрузка файла SNA
@@ -352,7 +351,11 @@ void Z80Spectrum::keyb(int press, SDL_KeyboardEvent* eventkey) {
                 case SDLK_F2: savesna("autosave.sna"); break;
                 case SDLK_F3: loadsna("autosave.sna"); break;
                 case SDLK_F4: 
-                    start_tape = !start_tape; st_tape=0;
+                    if (tapsize>0) {
+                        start_tape = !start_tape; if (start_tape) initTape();
+                    } else {
+                        printf("Tap file is not loaded!\n");    
+                    }
                     break;
 
                 // Показать/скрыть экран

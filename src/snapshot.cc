@@ -262,8 +262,12 @@ void Z80Spectrum::loadz80block(int mode, int& cursor, int &addr, unsigned char* 
     }
 }
 
+void Z80Spectrum::initTape(){
+    st_tape = 0;
+    pos_tape = 0;
+}
 
-void Z80Spectrum::tap2Mem(const char* filename, unsigned char* buf) {    
+int Z80Spectrum::tap2Mem(const char* filename, unsigned char* buf) {    
     FILE* fp = fopen(filename, "rb");
     if (fp == NULL) { printf("No file %s\n", filename); exit(1); }
     fseek(fp, 0, SEEK_END);
@@ -271,20 +275,30 @@ void Z80Spectrum::tap2Mem(const char* filename, unsigned char* buf) {
     fseek(fp, 0, SEEK_SET);
     fread(buf, 1, fsize, fp);
     fclose(fp);
+    return fsize;
 }
 
 int getBit(unsigned char data, int bitn ){
-    return (data>>bitn) & 1;
+    int result = (data>>bitn) & 1;
+    //printf("d: %x b:%d r:%d\n", data, bitn, result);
+    return result;
 }
 
-int checkDelayAndInverse(long t_states_all, int state, Uint8 &bit){
+int delayTick(long t_states_all, int delay){
     static long t_ear=0;
-    static int pulse_cnt=0;
-    int delays[]={4334/2, 667, 737, 1710, 1710, 855, 855 }; //tone 
-    int pulses[]={5*2*807, 1,   1,   1,    1,    1,  1 };
-
-    if (t_ear + delays[state] < t_states_all ) {
+    if (t_ear + delay < t_states_all ) {
         t_ear = t_states_all;
+        return 1;
+    } else
+        return 0;
+}
+
+int checkDelayAndInverse(long t_states_all, int state, Uint8 &bit){    
+    static int pulse_cnt=0;
+    int delays[]={4334/2, 667, 737, 1710, 1710, 855, 855 };  
+    int pulses[]={2*2*807, 1,   1,   1,    1,    1,  1 };
+
+    if (delayTick(t_states_all, delays[state])) {        
         if (bit) bit=0; else bit=1;
         pulse_cnt++;                
         if (pulse_cnt == pulses[state]) {
@@ -297,32 +311,33 @@ int checkDelayAndInverse(long t_states_all, int state, Uint8 &bit){
 
 //6 бит магнитофона
 Uint8 Z80Spectrum::getBitEar(){
-    static Uint8 ear=0;    
-    static int pos=0;
-    static int bitn=0;
-    static int len=0;
+    static Uint8 ear=0;
+    static int bitn=0; // номер бита
+    static int len_block=0; // длина текущего блока
+    static int cnt_block=0; //  в текущем блоке
     static int data=0;
     switch (st_tape) {
         case 0: // pilot tone
             if (checkDelayAndInverse(t_states_all, st_tape, ear) ) {
                 st_tape=1;
-                printf("1 ear: %d\n", ear);
+                cnt_block=0;
+                len_block = tapfile[pos_tape++] + tapfile[pos_tape++]*256;                
+                printf("len block: %d pos: %d\n", len_block, pos_tape);
             }
             break;
         case 1: // header 0
             if (checkDelayAndInverse(t_states_all, st_tape, ear) ) {
                 st_tape=2;
-                printf("2 ear: %d\n", ear);
+                //printf("2 ear: %d\n", ear);
             }
             break;
-        case 2: //header 1
+        case 2: // header 1
             if (checkDelayAndInverse(t_states_all, st_tape, ear) ) {
                 st_tape=7;
-                len = tapfile[pos++] + tapfile[pos++]*256;
-                //printf("3 ear: %d\n", ear);
             }
             break;
         case 3: // 1.0
+            ear =0;
             if (checkDelayAndInverse(t_states_all, st_tape, ear) ) {
                 st_tape=4;
                 //printf("3 ear: %d\n", ear);
@@ -335,8 +350,9 @@ Uint8 Z80Spectrum::getBitEar(){
             }
             break;
         case 5: // 0.0
+            ear = 0;
             if (checkDelayAndInverse(t_states_all, st_tape, ear) ) {
-                st_tape=5;
+                st_tape=6;
                 //printf("3 ear: %d\n", ear);
             }
             break;
@@ -347,19 +363,34 @@ Uint8 Z80Spectrum::getBitEar(){
             }
             break;
         case 7: // начало передачи байта
-            bitn = 7;
-            if (pos == len) st_tape = 10;
-            data = tapfile[pos++];
-            st_tape = 8;
+            bitn = 7;            
+            //printf("7s cnt:%d\n", cnt_block);
+            if (cnt_block++ >= len_block) 
+                st_tape = 9; //следующий блок
+            else {
+                data = tapfile[pos_tape++];
+                st_tape = 8;
+            }
             break;
         case 8: // следующий бит
-            if (bitn == 0) st_tape=7 ;
+            if (bitn < 0) st_tape=7 ;
             else {
-                if (getBit(data, bitn--)) st_tape=3; else st_tape=5;
+                if (getBit(data, bitn--))
+                    st_tape=3;
+                else st_tape=5;
+            }
+            break;
+        case 9: // следующий блок
+            if (pos_tape >= tapsize) st_tape=15;
+            if (delayTick(t_states_all, 1750000)) {
+                st_tape=0 ;
+                //printf("10s :%d\n", st_tape);
             }
             break;
         default:
             start_tape=0;
+            st_tape=0;
+            pos_tape=0;
             break;
     }
     return ear;    
@@ -368,10 +399,9 @@ Uint8 Z80Spectrum::getBitEar(){
 // https://sinclair.wiki.zxnet.co.uk/wiki/TAP_format
 void Z80Spectrum::loadtap(const char* filename) {    
 
-    tap2Mem(filename, tapfile);
-    printf("load tape file: %s\n", filename);
-    return;
-    
+    tapsize = tap2Mem(filename, tapfile);
+    printf("loading tape file: %s\n", filename);
+        
     int nblock=0;
     int szblock=0;
     int flag;    
@@ -380,7 +410,7 @@ void Z80Spectrum::loadtap(const char* filename) {
     char file[11]="";
     int szheader=0;
     int p1,p2,p3;
-    for (int i=0;i<fsize; ) {
+    for (int i=0;i<tapsize; ) {
         nblock++;
         szblock = tapfile[i] + tapfile[i+1]*256 ; // (17 bytes+flag+checksum)
         flag = tapfile[i+2];   // (A reg, 00 for headers, ff for data blocks)  
@@ -402,12 +432,6 @@ void Z80Spectrum::loadtap(const char* filename) {
         printf("block: %d(%x)\t block sz: %d\t flag: %d\t type: %d\t file: %s\t hdr sz: %d \t p1: %d\t p2: %d \n", 
                 nblock, i,   szblock,           flag,    theader,   file,       szheader,     p1,     p2  );
         i += (2+szblock); 
-    }
-
-    //for (int a=0; a<8412;a++) {
-    for (int a=0; a<12;a++) {
-        printf("%x \t", tapfile[185+a]);
-        put48mem_byte(a+28672, tapfile[185+a]);
     }
     return;
     // Первым в TAP должен идти бейсик

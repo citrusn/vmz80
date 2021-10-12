@@ -76,7 +76,6 @@ unsigned char Z80Spectrum::io_read(unsigned int port) {
         if (start_tape) {
             result &= 0xbf;
             result |= getBitEar()<<6;
-            //printf("%x-", b);
         }
         return result;
     }

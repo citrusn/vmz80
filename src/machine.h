@@ -158,6 +158,8 @@ protected:
     int     start_tape;         // запуск магнитофона
     unsigned char tapfile[64*1024];
     int     st_tape;            // машина состояний загрузки
+    int     pos_tape;           // позиция в тап файле для загрузки
+    int     tapsize;            // размер файла тап
 
 // -----------------------------------------------------------------
 // Свойства: Звук
@@ -235,7 +237,7 @@ protected:
     unsigned char   io_read     (unsigned int port);
     void            io_write    (unsigned int port, unsigned char data);
 
-    void    trdos_handler();
+    void     trdos_handler();
 
 // -----------------------------------------------------------------
 // Методы: Звук
@@ -268,10 +270,11 @@ protected:
     void    savesna(const char* filename);
     void    encodebmp(int audio_c);
     void    waveFmtHeader();
+    void    initTape();
     // Для 6 бита возвращает состояние маг. входа
     Uint8   getBitEar(); 
     // чтение тап файла в память
-    void    tap2Mem(const char* filename, unsigned char* buf);   
+    int    tap2Mem(const char* filename, unsigned char* buf);   
 
 // -----------------------------------------------------------------
 // Methods: Disassembler
