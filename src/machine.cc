@@ -34,11 +34,10 @@ void Z80Spectrum::main() {
             audio_device.channels = 2;
             audio_device.samples  = 882; // два канала, #DONE: надо переделать 
             audio_device.callback = sdl_audio_buffer;
-            audio_device.userdata = NULL;
-            SDL_AudioSpec fact;
-	    SDL_OpenAudioDevice(NULL, 0, &audio_device, obtained, SDL_AUDIO_ALLOW_ANY_CHANGE);
+            audio_device.userdata = NULL;          
 
             if (SDL_OpenAudio(&audio_device, NULL) < 0 ) {
+            //if (SDL_OpenAudioDevice(NULL, 0, &audio_device, NULL, SDL_AUDIO_ALLOW_ANY_CHANGE) <0) {
                 fprintf(stderr, "Couldn't open audio: %s\n", SDL_GetError());                
                 exit(1);
             }
@@ -352,6 +351,9 @@ void Z80Spectrum::keyb(int press, SDL_KeyboardEvent* eventkey) {
 
                 case SDLK_F2: savesna("autosave.sna"); break;
                 case SDLK_F3: loadsna("autosave.sna"); break;
+                case SDLK_F4: 
+                    start_tape = !start_tape; st_tape=0;
+                    break;
 
                 // Показать/скрыть экран
                 case SDLK_F5: if (ds_showfb) disasm_repaint(); else redraw_fb(); break;

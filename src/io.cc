@@ -72,6 +72,12 @@ unsigned char Z80Spectrum::io_read(unsigned int port) {
                 result &= key_states[ row ];
             }
         }
+        //D6 - отображает состояние магнитофонного входа (EAR).
+        if (start_tape) {
+            result &= 0xbf;
+            result |= getBitEar()<<6;
+            //printf("%x-", b);
+        }
         return result;
     }
     // Kempston Joystick

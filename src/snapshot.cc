@@ -262,19 +262,116 @@ void Z80Spectrum::loadz80block(int mode, int& cursor, int &addr, unsigned char* 
     }
 }
 
-// https://sinclair.wiki.zxnet.co.uk/wiki/TAP_format
-void Z80Spectrum::loadtap(const char* filename) {
 
-    unsigned char tapfile[64*1024];
-
+void Z80Spectrum::tap2Mem(const char* filename, unsigned char* buf) {    
     FILE* fp = fopen(filename, "rb");
     if (fp == NULL) { printf("No file %s\n", filename); exit(1); }
     fseek(fp, 0, SEEK_END);
     int fsize = ftell(fp);
     fseek(fp, 0, SEEK_SET);
-    fread(tapfile, 1, fsize, fp);
+    fread(buf, 1, fsize, fp);
     fclose(fp);
+}
 
+int getBit(unsigned char data, int bitn ){
+    return (data>>bitn) & 1;
+}
+
+int checkDelayAndInverse(long t_states_all, int state, Uint8 &bit){
+    static long t_ear=0;
+    static int pulse_cnt=0;
+    int delays[]={4334/2, 667, 737, 1710, 1710, 855, 855 }; //tone 
+    int pulses[]={5*2*807, 1,   1,   1,    1,    1,  1 };
+
+    if (t_ear + delays[state] < t_states_all ) {
+        t_ear = t_states_all;
+        if (bit) bit=0; else bit=1;
+        pulse_cnt++;                
+        if (pulse_cnt == pulses[state]) {
+            pulse_cnt=0; 
+            return 1;
+        }
+    }
+    return 0;
+}
+
+//6 бит магнитофона
+Uint8 Z80Spectrum::getBitEar(){
+    static Uint8 ear=0;    
+    static int pos=0;
+    static int bitn=0;
+    static int len=0;
+    static int data=0;
+    switch (st_tape) {
+        case 0: // pilot tone
+            if (checkDelayAndInverse(t_states_all, st_tape, ear) ) {
+                st_tape=1;
+                printf("1 ear: %d\n", ear);
+            }
+            break;
+        case 1: // header 0
+            if (checkDelayAndInverse(t_states_all, st_tape, ear) ) {
+                st_tape=2;
+                printf("2 ear: %d\n", ear);
+            }
+            break;
+        case 2: //header 1
+            if (checkDelayAndInverse(t_states_all, st_tape, ear) ) {
+                st_tape=7;
+                len = tapfile[pos++] + tapfile[pos++]*256;
+                //printf("3 ear: %d\n", ear);
+            }
+            break;
+        case 3: // 1.0
+            if (checkDelayAndInverse(t_states_all, st_tape, ear) ) {
+                st_tape=4;
+                //printf("3 ear: %d\n", ear);
+            }
+            break;
+        case 4: // 1.1
+            if (checkDelayAndInverse(t_states_all, st_tape, ear) ) {
+                st_tape=8;
+                //printf("3 ear: %d\n", ear);
+            }
+            break;
+        case 5: // 0.0
+            if (checkDelayAndInverse(t_states_all, st_tape, ear) ) {
+                st_tape=5;
+                //printf("3 ear: %d\n", ear);
+            }
+            break;
+        case 6: // 0.1
+            if (checkDelayAndInverse(t_states_all, st_tape, ear) ) {
+                st_tape=8;
+                //printf("3 ear: %d\n", ear);
+            }
+            break;
+        case 7: // начало передачи байта
+            bitn = 7;
+            if (pos == len) st_tape = 10;
+            data = tapfile[pos++];
+            st_tape = 8;
+            break;
+        case 8: // следующий бит
+            if (bitn == 0) st_tape=7 ;
+            else {
+                if (getBit(data, bitn--)) st_tape=3; else st_tape=5;
+            }
+            break;
+        default:
+            start_tape=0;
+            break;
+    }
+    return ear;    
+}
+
+// https://sinclair.wiki.zxnet.co.uk/wiki/TAP_format
+void Z80Spectrum::loadtap(const char* filename) {    
+
+    tap2Mem(filename, tapfile);
+    printf("load tape file: %s\n", filename);
+    return;
+    
     // Первым в TAP должен идти бейсик
     if (tapfile[0x17] != 0xFF) {
         printf("No BASIC program\n"); exit(1);

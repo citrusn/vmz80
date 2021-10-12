@@ -155,6 +155,9 @@ protected:
     int     frame_counter;        // Количество кадров от начала
     int     lookupfb[192];        // Для более быстрого определения адреса
     char    strbuf[256];
+    int     start_tape;         // запуск магнитофона
+    unsigned char tapfile[64*1024];
+    int     st_tape;            // машина состояний загрузки
 
 // -----------------------------------------------------------------
 // Свойства: Звук
@@ -265,6 +268,10 @@ protected:
     void    savesna(const char* filename);
     void    encodebmp(int audio_c);
     void    waveFmtHeader();
+    // Для 6 бита возвращает состояние маг. входа
+    Uint8   getBitEar(); 
+    // чтение тап файла в память
+    void    tap2Mem(const char* filename, unsigned char* buf);   
 
 // -----------------------------------------------------------------
 // Methods: Disassembler
