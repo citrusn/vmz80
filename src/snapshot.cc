@@ -372,6 +372,44 @@ void Z80Spectrum::loadtap(const char* filename) {
     printf("load tape file: %s\n", filename);
     return;
     
+    int nblock=0;
+    int szblock=0;
+    int flag;    
+    int theader=0;
+
+    char file[11]="";
+    int szheader=0;
+    int p1,p2,p3;
+    for (int i=0;i<fsize; ) {
+        nblock++;
+        szblock = tapfile[i] + tapfile[i+1]*256 ; // (17 bytes+flag+checksum)
+        flag = tapfile[i+2];   // (A reg, 00 for headers, ff for data blocks)  
+        if (flag) { // data block
+            theader=0;
+            szheader= 0;
+            p1 = p2 = 0;
+        } else {  // header
+            theader = tapfile[i+3]; //first byte (0,1,2 or 3  Program, Number array, Character array or Code file)
+            strncpy(file, (char*)tapfile+3+1+i, 10); file[10]=0;
+            szheader= tapfile[3+11+i] + tapfile[3+11+i+1]*256 ;
+            //Program file, p1 holds the autostart line number (or a number >=32768 ) 
+            //    and parameter 2 holds the start of the variable area relative to the start of the program.
+            //Code file, p1 holds the start of the code block when saved, and parameter 2 holds 32768.
+            //Data files finally, the byte at position 14 decimal holds the variable name.
+            p1 = tapfile[3+13+i]+ tapfile[3+13+i+1]*256 ;
+            p2 = tapfile[3+15+i]+ tapfile[3+15+i+1]*256 ;
+        }               
+        printf("block: %d(%x)\t block sz: %d\t flag: %d\t type: %d\t file: %s\t hdr sz: %d \t p1: %d\t p2: %d \n", 
+                nblock, i,   szblock,           flag,    theader,   file,       szheader,     p1,     p2  );
+        i += (2+szblock); 
+    }
+
+    //for (int a=0; a<8412;a++) {
+    for (int a=0; a<12;a++) {
+        printf("%x \t", tapfile[185+a]);
+        put48mem_byte(a+28672, tapfile[185+a]);
+    }
+    return;
     // Первым в TAP должен идти бейсик
     if (tapfile[0x17] != 0xFF) {
         printf("No BASIC program\n"); exit(1);
@@ -385,8 +423,8 @@ void Z80Spectrum::loadtap(const char* filename) {
 
     int endp = 0x5ccb + bsize;
     int next = endp;
-
-    // END OF PROGRAM
+    printf("basic size: %d", bsize);
+    // END OF PROGRAM: 
     put48mem_word(endp,   0x0D80);  // Линия 1
     put48mem_word(endp+2, 0x2280);
     put48mem_word(endp+4, 0x800D);  // Линия 2
@@ -406,6 +444,10 @@ void Z80Spectrum::loadtap(const char* filename) {
 
     next++;
     put48mem_word(0x5C55, next);    // NXTLIN :: https://skoolkid.github.io/rom/asm/5C55.html
+
+    for (int a=0; a<8412;a++) {
+        put48mem_byte(a+28672, tapfile[185+a]);
+    }
 
 /*
     // Всякие непонятные параметры
