@@ -19,7 +19,7 @@ void Z80Spectrum::frame() {
     max_audio_cycle = max_tstates*50; // всего циклов за секунду
 
     // Автоматическое нажимание на клавиши
-    //autostart_macro();
+    autostart_macro();
 
     // Всегда сбрасывать в начале кадра (чтобы демки работали)
     t_states_cycle = 0;
@@ -28,7 +28,6 @@ void Z80Spectrum::frame() {
 
     // Выполнить необходимое количество циклов
     while (t_states_cycle < max_tstates) {
-    //for (t_states_cycle=0; t_states_cycle < max_tstates; t_states_cycle+=10)   {
 
         contended_mem = 0;
 
@@ -47,17 +46,16 @@ void Z80Spectrum::frame() {
         if (ds_halt_dump) { if (mem_read(pc) == 0x76) { z80state_dump(); exit(0); } }
 
         // Вход в TRDOS
-        trdos_handler();
-        int i ;
+        trdos_handler();        
         // Исполнение инструкции
         if (t_states_cpu < max_tstates) {
-            i = run_instruction();
+            int i = run_instruction();
             t_states_cpu += i;
-            t_states_all += i;
         }
 
         int t_states = 8; //
         t_states_cycle += t_states;
+        t_states_all += t_states;
         
 
         // 1 CPU (3.5МГц) = 2 PPU (7 МГц) 
@@ -95,7 +93,7 @@ void Z80Spectrum::frame() {
         // Запись в wav звука (учитывая автостарт)
         ay_sound_tick(t_states, audio_c);
     }
-    //printf("%d %d\n", t_states_cycle, t_states_cpu );
+    printf("%d %d\n", t_states_cycle, t_states_cpu );
 
     t_states_cycle -= max_tstates;
 

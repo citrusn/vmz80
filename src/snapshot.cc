@@ -278,7 +278,7 @@ int Z80Spectrum::tap2Mem(const char* filename, unsigned char* buf) {
     return fsize;
 }
 
-int getBit(unsigned char data, int bitn ){
+inline int getBit(unsigned char data, int bitn ){
     int result = (data>>bitn) & 1;
     //printf("d: %x b:%d r:%d\n", data, bitn, result);
     return result;
@@ -393,7 +393,7 @@ Uint8 Z80Spectrum::getBitEar(){
             pos_tape=0;
             break;
     }
-    return ear;    
+    return ear;
 }
 
 // https://sinclair.wiki.zxnet.co.uk/wiki/TAP_format
